@@ -1,21 +1,21 @@
-# 🌻 Sunflower Journal
+# Sunflower Journal
 
 A friendly, community-focused web app where neighbors can sign up and create their own Sunflower Journal to track a sunflower from seed to bloom.
 
 ## Features
 
 ### MVP (Current)
-- ✅ User accounts with email/password authentication
-- ✅ One sunflower journal per user
-- ✅ Journal entries with:
+- User accounts with email/password authentication
+- One sunflower journal per user
+- Journal entries with:
   - Date (defaults to today)
   - Text notes
   - Optional photo upload
   - Optional height tracking (cm)
-- ✅ Personal journal timeline view
-- ✅ Community feed showing public entries
-- ✅ Admin moderation tools
-- ✅ Mobile-first responsive design
+- Personal journal timeline view
+- Community feed showing public entries
+- Admin moderation tools
+- Mobile-first responsive design
 
 ## Tech Stack
 
@@ -219,10 +219,7 @@ pytest --cov=app  # With coverage
 - S3 photo storage integration
 - Mobile apps (PWA or native)
 
-## License
-
-[Your License Here]
-
 ## Contact
 
-[Your Contact Info]
+Trevor Drozd
+trcharlesd@gmail.com
