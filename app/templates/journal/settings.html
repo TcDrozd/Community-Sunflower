@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Sunflower Journal{% endblock %}
+
+{% block content %}
+<article style="max-width: 600px; margin: 2rem auto;">
+    <header>
+        <h2>Sunflower Settings</h2>
+        <p>Customize your sunflower journal.</p>
+    </header>
+    
+    <form method="POST" action="{{ url_for('journal.settings') }}">
+        {{ form.hidden_tag() }}
+        
+        <label for="name">
+            Sunflower Name
+            {{ form.name(placeholder="e.g., Sunny, Big Yellow, Sol") }}
+            {% if form.name.errors %}
+                <small style="color: var(--del-color);">{{ form.name.errors[0] }}</small>
+            {% endif %}
+            <small>Give your sunflower a name!</small>
+        </label>
+        
+        <label for="planted_date">
+            Date Planted
+            {{ form.planted_date() }}
+            {% if form.planted_date.errors %}
+                <small style="color: var(--del-color);">{{ form.planted_date.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <div style="display: flex; gap: 1rem;">
+            {{ form.submit() }}
+            <a href="{{ url_for('journal.my_journal') }}" role="button" class="secondary">Cancel</a>
+        </div>
+    </form>
+</article>
+{% endblock %}

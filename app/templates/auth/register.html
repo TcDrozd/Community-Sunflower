@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Sunflower Journal{% endblock %}
+
+{% block content %}
+<article style="max-width: 500px; margin: 2rem auto;">
+    <header>
+        <h2>Create Your Account</h2>
+        <p>Join the Sunflower Community and start your journal today.</p>
+    </header>
+    
+    <form method="POST" action="{{ url_for('auth.register') }}">
+        {{ form.hidden_tag() }}
+        
+        <label for="email">
+            Email
+            {{ form.email(placeholder="your@email.com") }}
+            {% if form.email.errors %}
+                <small style="color: var(--del-color);">{{ form.email.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label for="display_name">
+            Display Name
+            {{ form.display_name(placeholder="How you'll appear to others") }}
+            {% if form.display_name.errors %}
+                <small style="color: var(--del-color);">{{ form.display_name.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label for="password">
+            Password
+            {{ form.password(placeholder="At least 8 characters") }}
+            {% if form.password.errors %}
+                <small style="color: var(--del-color);">{{ form.password.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label for="password_confirm">
+            Confirm Password
+            {{ form.password_confirm(placeholder="Re-enter your password") }}
+            {% if form.password_confirm.errors %}
+                <small style="color: var(--del-color);">{{ form.password_confirm.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        {{ form.submit() }}
+    </form>
+    
+    <footer>
+        <small>Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></small>
+    </footer>
+</article>
+{% endblock %}

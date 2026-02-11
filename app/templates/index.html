@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section style="text-align: center; padding: 4rem 0;">
+    <h1>🌻 Welcome to Sunflower Journal</h1>
+    <p style="font-size: 1.2rem; color: #666; margin: 1.5rem 0;">
+        Track your sunflower's journey from seed to bloom.<br>
+        Share your progress with a friendly community of gardeners.
+    </p>
+    
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('auth.register') }}" role="button">Get Started</a>
+        <a href="{{ url_for('auth.login') }}" role="button" class="secondary">Log In</a>
+    </div>
+</section>
+
+<section style="margin-top: 4rem;">
+    <div class="grid">
+        <div style="text-align: center;">
+            <h3>📝 Journal Your Growth</h3>
+            <p>Record daily notes, measure height, and capture photos of your sunflower's progress.</p>
+        </div>
+        <div style="text-align: center;">
+            <h3>📸 Share Moments</h3>
+            <p>Show off your sunflower's milestones with the community feed.</p>
+        </div>
+        <div style="text-align: center;">
+            <h3>🌱 Grow Together</h3>
+            <p>See what others are growing and celebrate the journey together.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

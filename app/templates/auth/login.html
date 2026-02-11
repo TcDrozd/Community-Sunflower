@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Log In - Sunflower Journal{% endblock %}
+
+{% block content %}
+<article style="max-width: 500px; margin: 2rem auto;">
+    <header>
+        <h2>Welcome Back</h2>
+        <p>Log in to continue your sunflower journey.</p>
+    </header>
+    
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        {{ form.hidden_tag() }}
+        
+        <label for="email">
+            Email
+            {{ form.email(placeholder="your@email.com") }}
+            {% if form.email.errors %}
+                <small style="color: var(--del-color);">{{ form.email.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label for="password">
+            Password
+            {{ form.password(placeholder="Your password") }}
+            {% if form.password.errors %}
+                <small style="color: var(--del-color);">{{ form.password.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label>
+            {{ form.remember_me() }}
+            Remember me
+        </label>
+        
+        {{ form.submit() }}
+    </form>
+    
+    <footer>
+        <small>
+            <a href="{{ url_for('auth.reset_password_request') }}">Forgot password?</a> · 
+            <a href="{{ url_for('auth.register') }}">Create account</a>
+        </small>
+    </footer>
+</article>
+{% endblock %}

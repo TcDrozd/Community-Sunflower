@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Sunflower Journal{% endblock %}
+
+{% block content %}
+<article style="text-align: center; padding: 4rem 0;">
+    <h1>😞 Something Went Wrong</h1>
+    <p style="font-size: 1.2rem; color: #666; margin: 1.5rem 0;">
+        We're sorry, but something unexpected happened. Please try again later.
+    </p>
+    <a href="{{ url_for('index') }}" role="button">Go Home</a>
+</article>
+{% endblock %}

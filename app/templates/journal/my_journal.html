@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sunflower.name }} - My Journal{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>🌻 {{ sunflower.name }}</h1>
+            <p style="color: #666;">Planted {{ sunflower.planted_date.strftime('%B %d, %Y') }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('journal.new_entry') }}" role="button">+ New Entry</a>
+            <a href="{{ url_for('journal.settings') }}" role="button" class="secondary">Settings</a>
+        </div>
+    </div>
+</header>
+
+{% if entries %}
+    <section>
+        {% for entry in entries %}
+            <div class="entry-card">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="margin: 0;">{{ entry.date.strftime('%B %d, %Y') }}</h4>
+                        <p class="entry-meta">
+                            {% if entry.height_cm %}
+                                Height: {{ entry.height_cm }} cm
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('journal.edit_entry', entry_id=entry.id) }}" role="button" class="secondary" style="padding: 0.25rem 0.75rem; font-size: 0.9rem;">Edit</a>
+                    </div>
+                </div>
+                
+                {% if entry.note %}
+                    <p style="margin-top: 1rem;">{{ entry.note }}</p>
+                {% endif %}
+                
+                {% if entry.photo_path %}
+                    <img src="{{ entry.photo_url }}" alt="Photo from {{ entry.date.strftime('%B %d') }}" class="entry-photo">
+                {% endif %}
+                
+                <div class="entry-meta" style="margin-top: 1rem;">
+                    {% if entry.is_public %}
+                        <small>✓ Shared with community</small>
+                    {% else %}
+                        <small>🔒 Private</small>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </section>
+{% else %}
+    <article style="text-align: center; padding: 3rem 0;">
+        <p style="color: #666; font-size: 1.1rem;">No entries yet. Start documenting your sunflower's journey!</p>
+        <a href="{{ url_for('journal.new_entry') }}" role="button" style="margin-top: 1rem;">Create First Entry</a>
+    </article>
+{% endif %}
+{% endblock %}

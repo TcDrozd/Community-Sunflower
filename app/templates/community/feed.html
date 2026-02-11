@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Community Feed - Sunflower Journal{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 2rem;">
+    <h1>🌻 Community Feed</h1>
+    <p style="color: #666;">See what everyone's sunflowers are up to</p>
+</header>
+
+{% if entries %}
+    <section>
+        {% for entry in entries %}
+            <div class="entry-card">
+                <div style="margin-bottom: 1rem;">
+                    <strong>{{ entry.sunflower.user.display_name }}</strong>'s 
+                    <strong>{{ entry.sunflower.name }}</strong>
+                    <p class="entry-meta" style="margin: 0.25rem 0 0 0;">
+                        {{ entry.date.strftime('%B %d, %Y') }}
+                        {% if entry.height_cm %}
+                            · Height: {{ entry.height_cm }} cm
+                        {% endif %}
+                    </p>
+                </div>
+                
+                {% if entry.note %}
+                    <p>{{ entry.note }}</p>
+                {% endif %}
+                
+                {% if entry.photo_path %}
+                    <img src="{{ entry.photo_url }}" alt="Photo from {{ entry.date.strftime('%B %d') }}" class="entry-photo">
+                {% endif %}
+            </div>
+        {% endfor %}
+    </section>
+    
+    {% if pagination.has_prev or pagination.has_next %}
+        <nav style="margin-top: 2rem; text-align: center;">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('community.feed', page=pagination.prev_num) }}" role="button" class="secondary">← Previous</a>
+            {% endif %}
+            
+            <span style="margin: 0 1rem;">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            
+            {% if pagination.has_next %}
+                <a href="{{ url_for('community.feed', page=pagination.next_num) }}" role="button" class="secondary">Next →</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+{% else %}
+    <article style="text-align: center; padding: 3rem 0;">
+        <p style="color: #666; font-size: 1.1rem;">No entries yet. Be the first to share!</p>
+        <a href="{{ url_for('journal.new_entry') }}" role="button" style="margin-top: 1rem;">Create Entry</a>
+    </article>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Sunflower Journal{% endblock %}
+
+{% block content %}
+<article style="max-width: 600px; margin: 2rem auto;">
+    <header>
+        <h2>{{ title }}</h2>
+    </header>
+    
+    <form method="POST" action="" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        
+        <label for="date">
+            Date
+            {{ form.date() }}
+            {% if form.date.errors %}
+                <small style="color: var(--del-color);">{{ form.date.errors[0] }}</small>
+            {% endif %}
+        </label>
+        
+        <label for="note">
+            Notes
+            {{ form.note(rows=5, placeholder="What happened today? How's your sunflower doing?") }}
+            {% if form.note.errors %}
+                <small style="color: var(--del-color);">{{ form.note.errors[0] }}</small>
+            {% endif %}
+            <small>Share observations, milestones, or just say hello to your sunflower.</small>
+        </label>
+        
+        <label for="height_cm">
+            Height (cm)
+            {{ form.height_cm(placeholder="e.g., 12.5") }}
+            {% if form.height_cm.errors %}
+                <small style="color: var(--del-color);">{{ form.height_cm.errors[0] }}</small>
+            {% endif %}
+            <small>Optional - track your sunflower's growth over time.</small>
+        </label>
+        
+        <label for="photo">
+            Photo
+            {{ form.photo() }}
+            {% if form.photo.errors %}
+                <small style="color: var(--del-color);">{{ form.photo.errors[0] }}</small>
+            {% endif %}
+            <small>JPG, PNG, or GIF. Max 5MB.</small>
+        </label>
+        
+        {% if entry and entry.photo_path %}
+            <div style="margin: 1rem 0;">
+                <p><strong>Current photo:</strong></p>
+                <img src="{{ entry.photo_url }}" alt="Current entry photo" style="max-width: 300px; border-radius: 0.5rem;">
+                <p><small>Upload a new photo to replace this one.</small></p>
+            </div>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem;">
+            {{ form.submit() }}
+            <a href="{{ url_for('journal.my_journal') }}" role="button" class="secondary">Cancel</a>
+        </div>
+    </form>
+    
+    {% if entry %}
+        <footer style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
+            <form method="POST" action="{{ url_for('journal.delete_entry', entry_id=entry.id) }}" onsubmit="return confirm('Are you sure you want to delete this entry?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="secondary" style="background-color: #dc3545; border-color: #dc3545;">Delete Entry</button>
+            </form>
+        </footer>
+    {% endif %}
+</article>
+{% endblock %}

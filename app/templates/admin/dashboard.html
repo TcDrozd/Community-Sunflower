@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Sunflower Journal{% endblock %}
+
+{% block content %}
+<header style="margin-bottom: 2rem;">
+    <h1>Admin Dashboard</h1>
+</header>
+
+<section style="margin-bottom: 3rem;">
+    <div class="grid">
+        <article>
+            <header><h3>{{ user_count }}</h3></header>
+            <p>Total Users</p>
+        </article>
+        <article>
+            <header><h3>{{ entry_count }}</h3></header>
+            <p>Total Entries</p>
+        </article>
+    </div>
+</section>
+
+<section style="margin-bottom: 2rem;">
+    <h2>Quick Actions</h2>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <a href="{{ url_for('admin.users') }}" role="button">Manage Users</a>
+        <a href="{{ url_for('admin.entries') }}" role="button" class="secondary">Moderate Entries</a>
+    </div>
+</section>
+
+<section style="margin-bottom: 2rem;">
+    <h3>Recent Users</h3>
+    {% if recent_users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Display Name</th>
+                    <th>Email</th>
+                    <th>Joined</th>
+                    <th>Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.display_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{% if user.is_admin %}✓{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No users yet.</p>
+    {% endif %}
+</section>
+
+<section>
+    <h3>Recent Entries</h3>
+    {% if recent_entries %}
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Has Photo</th>
+                    <th>Public</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in recent_entries %}
+                    <tr>
+                        <td>{{ entry.sunflower.user.display_name }}</td>
+                        <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{% if entry.photo_path %}✓{% endif %}</td>
+                        <td>{% if entry.is_public %}✓{% endif %}</td>
+                        <td>{{ entry.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No entries yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

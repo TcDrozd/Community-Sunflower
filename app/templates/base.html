@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sunflower Journal{% endblock %}</title>
+    
+    <!-- Pico CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        :root {
+            --primary: #f4a835;
+            --primary-hover: #e69422;
+            --primary-focus: rgba(244, 168, 53, 0.125);
+        }
+        
+        body {
+            background-color: #fefdf8;
+        }
+        
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .brand:hover {
+            color: var(--primary-hover);
+        }
+        
+        nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .flash-messages {
+            margin-top: 1rem;
+        }
+        
+        .flash {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .flash.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .flash.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .flash.warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .flash.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .entry-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .entry-photo {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .entry-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid #e5e5e5;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="{{ url_for('index') }}" class="brand">🌻 Sunflower Journal</a></li>
+        </ul>
+        <ul>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('journal.my_journal') }}">My Journal</a></li>
+                <li><a href="{{ url_for('community.feed') }}">Community</a></li>
+                {% if current_user.is_admin %}
+                    <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+                <li><a href="{{ url_for('auth.register') }}" role="button">Sign Up</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container">
+        <small>Made with 🌻 by the Sunflower Community</small>
+    </footer>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
