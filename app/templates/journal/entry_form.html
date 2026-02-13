@@ -2,6 +2,47 @@
 
 {% block title %}{{ title }} - Sunflower Journal{% endblock %}
 
+{% block extra_css %}
+<style>
+    .photo-controls {
+        margin-top: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .photo-status {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .rotate-modal {
+        width: min(92vw, 720px);
+    }
+
+    .rotate-preview-wrap {
+        margin: 1rem 0;
+        min-height: 240px;
+        display: grid;
+        place-items: center;
+        background: #f7f7f7;
+        border-radius: 0.5rem;
+    }
+
+    .rotate-preview {
+        max-width: 100%;
+        max-height: 420px;
+        border-radius: 0.5rem;
+    }
+
+    .rotate-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <article style="max-width: 600px; margin: 2rem auto;">
     <header>
@@ -39,11 +80,15 @@
         
         <label for="photo">
             Photo
-            {{ form.photo() }}
+            {{ form.photo(id="photo-input", accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif") }}
             {% if form.photo.errors %}
                 <small style="color: var(--del-color);">{{ form.photo.errors[0] }}</small>
             {% endif %}
             <small>JPG, PNG, or GIF. Max 5MB.</small>
+            <div class="photo-controls">
+                <button type="button" id="rotate-photo-btn" class="secondary" disabled>Rotate photo</button>
+                <span id="photo-rotation-status" class="photo-status">No rotation applied</span>
+            </div>
         </label>
         
         {% if entry and entry.photo_path %}
@@ -63,10 +108,196 @@
     {% if entry %}
         <footer style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
             <form method="POST" action="{{ url_for('journal.delete_entry', entry_id=entry.id) }}" onsubmit="return confirm('Are you sure you want to delete this entry?');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {{ form.hidden_tag() }}
                 <button type="submit" class="secondary" style="background-color: #dc3545; border-color: #dc3545;">Delete Entry</button>
             </form>
         </footer>
     {% endif %}
 </article>
+
+<dialog id="rotate-photo-modal" class="rotate-modal">
+    <article>
+        <header>
+            <h3>Rotate Photo</h3>
+        </header>
+        <p>Rotate the selected image, then apply before saving your entry.</p>
+        <div class="rotate-preview-wrap">
+            <img id="rotate-preview-image" class="rotate-preview" alt="Photo preview for rotation">
+        </div>
+        <p id="rotation-angle-label"><strong>Rotation:</strong> 0°</p>
+        <div class="rotate-actions">
+            <button type="button" id="rotate-left-btn" class="secondary">Rotate left</button>
+            <button type="button" id="rotate-right-btn" class="secondary">Rotate right</button>
+            <button type="button" id="apply-rotation-btn">Apply rotation</button>
+            <button type="button" id="close-rotation-btn" class="secondary">Close</button>
+        </div>
+    </article>
+</dialog>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const fileInput = document.getElementById('photo-input');
+    const rotateButton = document.getElementById('rotate-photo-btn');
+    const statusLabel = document.getElementById('photo-rotation-status');
+    const modal = document.getElementById('rotate-photo-modal');
+    const previewImage = document.getElementById('rotate-preview-image');
+    const angleLabel = document.getElementById('rotation-angle-label');
+    const rotateLeftButton = document.getElementById('rotate-left-btn');
+    const rotateRightButton = document.getElementById('rotate-right-btn');
+    const applyButton = document.getElementById('apply-rotation-btn');
+    const closeButton = document.getElementById('close-rotation-btn');
+
+    if (!fileInput || !rotateButton || !modal || !previewImage) {
+        return;
+    }
+
+    let selectedFile = null;
+    let currentRotation = 0;
+    let previewUrl = null;
+
+    const setRotationLabel = () => {
+        angleLabel.innerHTML = `<strong>Rotation:</strong> ${currentRotation}\u00B0`;
+    };
+
+    const setPreview = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        previewUrl = URL.createObjectURL(selectedFile);
+        previewImage.src = previewUrl;
+    };
+
+    const normalizeRotation = () => {
+        currentRotation %= 360;
+        if (currentRotation < 0) {
+            currentRotation += 360;
+        }
+    };
+
+    const openModal = () => {
+        if (typeof modal.showModal === 'function') {
+            modal.showModal();
+        }
+    };
+
+    const closeModal = () => {
+        if (typeof modal.close === 'function') {
+            modal.close();
+        }
+    };
+
+    const fileFromBlob = (blob, filename) => new File([blob], filename, {
+        type: blob.type || selectedFile.type || 'image/jpeg',
+        lastModified: Date.now()
+    });
+
+    const readImage = (file) => new Promise((resolve, reject) => {
+        const imageUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(imageUrl);
+            resolve(img);
+        };
+        img.onerror = (err) => {
+            URL.revokeObjectURL(imageUrl);
+            reject(err);
+        };
+        img.src = imageUrl;
+    });
+
+    const toBlob = (canvas, mimeType, quality) => new Promise((resolve) => {
+        canvas.toBlob(resolve, mimeType, quality);
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (!fileInput.files || !fileInput.files[0]) {
+            selectedFile = null;
+            rotateButton.disabled = true;
+            statusLabel.textContent = 'No rotation applied';
+            return;
+        }
+
+        selectedFile = fileInput.files[0];
+        currentRotation = 0;
+        setRotationLabel();
+        setPreview();
+        rotateButton.disabled = false;
+        statusLabel.textContent = 'No rotation applied';
+    });
+
+    rotateButton.addEventListener('click', () => {
+        if (!selectedFile) {
+            return;
+        }
+        normalizeRotation();
+        setRotationLabel();
+        openModal();
+    });
+
+    rotateLeftButton.addEventListener('click', () => {
+        currentRotation -= 90;
+        normalizeRotation();
+        setRotationLabel();
+    });
+
+    rotateRightButton.addEventListener('click', () => {
+        currentRotation += 90;
+        normalizeRotation();
+        setRotationLabel();
+    });
+
+    closeButton.addEventListener('click', closeModal);
+
+    applyButton.addEventListener('click', async () => {
+        if (!selectedFile) {
+            closeModal();
+            return;
+        }
+
+        if (currentRotation === 0) {
+            statusLabel.textContent = 'No rotation applied';
+            closeModal();
+            return;
+        }
+
+        try {
+            const img = await readImage(selectedFile);
+            const radians = currentRotation * Math.PI / 180;
+            const swapDimensions = currentRotation === 90 || currentRotation === 270;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = swapDimensions ? img.height : img.width;
+            canvas.height = swapDimensions ? img.width : img.height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(radians);
+            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+            const mimeType = selectedFile.type || 'image/jpeg';
+            const rotatedBlob = await toBlob(canvas, mimeType, 0.92);
+
+            if (!rotatedBlob) {
+                throw new Error('Failed to build rotated image blob');
+            }
+
+            const rotatedFile = fileFromBlob(rotatedBlob, selectedFile.name);
+            const transfer = new DataTransfer();
+            transfer.items.add(rotatedFile);
+            fileInput.files = transfer.files;
+            selectedFile = rotatedFile;
+
+            setPreview();
+            statusLabel.textContent = `Rotation applied: ${currentRotation}\u00B0`;
+            closeModal();
+        } catch (error) {
+            console.error('Error applying rotation:', error);
+            statusLabel.textContent = 'Rotation failed - original image kept';
+            closeModal();
+        }
+    });
+})();
+</script>
 {% endblock %}

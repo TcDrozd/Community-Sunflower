@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-sun-theme="solar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,14 +13,33 @@
     
     <!-- Custom styles -->
     <style>
-        :root {
+        :root[data-sun-theme="solar"] {
             --primary: #f4a835;
             --primary-hover: #e69422;
             --primary-focus: rgba(244, 168, 53, 0.125);
+            --bg-color: #fefdf8;
+            --surface-color: #ffffff;
+            --text-color: #1b1b1b;
+            --muted-color: #666666;
+            --border-color: #e5e5e5;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-sun-theme="lunar"] {
+            --primary: #d7bf77;
+            --primary-hover: #e6d293;
+            --primary-focus: rgba(215, 191, 119, 0.22);
+            --bg-color: #17140f;
+            --surface-color: #221d16;
+            --text-color: #f2ead5;
+            --muted-color: #c3b99d;
+            --border-color: #4b4335;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
         }
         
         body {
-            background-color: #fefdf8;
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
         
         .brand {
@@ -35,8 +54,16 @@
         }
         
         nav {
-            background-color: #fff;
-            border-bottom: 1px solid #e5e5e5;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .theme-toggle {
+            margin: 0;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.8rem;
+            min-height: unset;
+            line-height: 1.2;
         }
         
         .flash-messages {
@@ -74,11 +101,11 @@
         }
         
         .entry-card {
-            background: white;
+            background: var(--surface-color);
             border-radius: 0.5rem;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: var(--card-shadow);
         }
         
         .entry-photo {
@@ -88,16 +115,26 @@
         }
         
         .entry-meta {
-            color: #666;
+            color: var(--muted-color);
             font-size: 0.9rem;
         }
         
         footer {
             margin-top: 3rem;
             padding: 2rem 0;
-            border-top: 1px solid #e5e5e5;
+            border-top: 1px solid var(--border-color);
             text-align: center;
-            color: #666;
+            color: var(--muted-color);
+        }
+
+        [data-sun-theme="lunar"] :where(input, textarea, select, article, dialog) {
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        [data-sun-theme="lunar"] ::placeholder {
+            color: var(--muted-color);
         }
     </style>
     
@@ -109,6 +146,7 @@
             <li><a href="{{ url_for('index') }}" class="brand">🌻 Sunflower Journal</a></li>
         </ul>
         <ul>
+            <li><button type="button" id="theme-toggle" class="secondary theme-toggle">Theme: Solar</button></li>
             {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('journal.my_journal') }}">My Journal</a></li>
                 <li><a href="{{ url_for('community.feed') }}">Community</a></li>
@@ -141,6 +179,34 @@
         <small>Made with 🌻 by the Sunflower Community</small>
     </footer>
     
+    <script>
+        (() => {
+            const root = document.documentElement;
+            const toggle = document.getElementById('theme-toggle');
+            if (!toggle) return;
+
+            const storageKey = 'sunflower-theme';
+
+            const applyTheme = (theme) => {
+                const resolved = theme === 'lunar' ? 'lunar' : 'solar';
+                const picoTheme = resolved === 'lunar' ? 'dark' : 'light';
+                root.setAttribute('data-sun-theme', resolved);
+                root.setAttribute('data-theme', picoTheme);
+                toggle.textContent = `Theme: ${resolved === 'lunar' ? 'Lunar' : 'Solar'}`;
+            };
+
+            const savedTheme = localStorage.getItem(storageKey);
+            applyTheme(savedTheme || 'solar');
+
+            toggle.addEventListener('click', () => {
+                const currentTheme = root.getAttribute('data-sun-theme') === 'lunar' ? 'lunar' : 'solar';
+                const nextTheme = currentTheme === 'solar' ? 'lunar' : 'solar';
+                applyTheme(nextTheme);
+                localStorage.setItem(storageKey, nextTheme);
+            });
+        })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
